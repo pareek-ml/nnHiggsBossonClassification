@@ -1,8 +1,3 @@
-"""
-This script trains a Higgs Boson classification model using PyTorch.
-It includes functions for loading the dataset, training the model, and evaluating its performance.
-"""
-
 #!/usr/bin/env python
 """
 @File    :   train.py
@@ -13,15 +8,12 @@ It includes functions for loading the dataset, training the model, and evaluatin
 @Desc    :   None
 """
 # -*- coding: utf-8 -*-
-import math
 import time
-from typing import Optional
 
 import numpy as np
 import rich
 import torch
 import typer
-
 from openml import datasets
 from sklearn.metrics import average_precision_score, roc_auc_score
 from sklearn.preprocessing import StandardScaler
@@ -29,8 +21,8 @@ from torch import nn
 from torch.amp import GradScaler, autocast
 from torch.utils.data import DataLoader, TensorDataset, random_split
 
-from model import HiggsNet
 from logger import logger
+from model import HiggsNet
 
 
 def getdevice():
@@ -63,9 +55,11 @@ def load_higgs(openml_id=44129, scaler=None):
     raw_dataset = datasets.get_dataset(openml_id, download_data=True)
     dataset = raw_dataset.get_data()
     scaler = scaler or StandardScaler()
-    X = scaler.fit_transform(dataset[0].drop(columns=["target"]).astype(np.float32))
+    inputs = scaler.fit_transform(
+        dataset[0].drop(columns=["target"]).astype(np.float32)
+    )
     y = dataset[0]["target"].astype(np.float32)  # Convert target to float32
-    tensor_ds = TensorDataset(torch.tensor(X), torch.tensor(y))
+    tensor_ds = TensorDataset(torch.tensor(inputs), torch.tensor(y))
     return tensor_ds, scaler
 
 
@@ -153,7 +147,7 @@ def evaluate(model, loader, device, use_amp=False):
     return (roc_auc_score(y_true, y_prob), average_precision_score(y_true, y_prob))
 
 
-def train(
+def train_model(
     lr: float = 0.001,
     epochs: int = 10,
     model_pth: str = "./model.pt",
@@ -266,7 +260,7 @@ def main(
     logger.info(f"Number of epochs: {epochs}")
     logger.info(f"Model path: {model_pth}")
     logger.info(f"Pickle path: {pkl_path}")
-    train(lr=lr, epochs=epochs, model_pth=model_pth, pkl_path=pkl_path)
+    train_model(lr=lr, epochs=epochs, model_pth=model_pth, pkl_path=pkl_path)
 
 
 if __name__ == "__main__":

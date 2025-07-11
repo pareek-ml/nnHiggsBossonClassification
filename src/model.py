@@ -1,15 +1,14 @@
 """
 This module defines a deep residual network for Higgs Boson classification.
-It includes the `HiggsNet` class, which consists of multiple residual blocks for feature extraction
-and a final linear layer for binary classification.
-It also includes a `ResidualBlock` class that implements the residual connection and dropout for regularization
 """
-import torch
+
+import torch  # pylint: disable=unused-import
 import torch.nn as nn
-from torch.cuda.amp import GradScaler
 
 
 class ResidualBlock(nn.Module):
+    """Residual Block for HiggsNet."""
+
     def __init__(self, hidden_dim, dropout=0.2):
         super().__init__()
         self.block = nn.Sequential(
